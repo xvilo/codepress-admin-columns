@@ -197,8 +197,8 @@ class CPAC_Column {
 		 * Property $column_instance added in Admin Columns 2.2
 		 *
 		 * @since 2.0
+		 *
 		 * @param array $properties Column properties
-		 * @param CPAC_Storage_Model $storage_model Storage Model class instance
 		 */
 		$this->properties = apply_filters( 'cac/column/properties', $this->properties ); // do not pass $this because object is not ready
 
@@ -207,7 +207,7 @@ class CPAC_Column {
 		 * Property $column_instance added in Admin Columns 2.2
 		 *
 		 * @since 2.0
-		 * @see Filter cac/column/properties
+		 * @see filter cac/column/properties
 		 */
 		$this->properties = apply_filters( "cac/column/properties/storage_key={$this->storage_model->key}", $this->properties ); // do not pass $this because object is not ready
 
@@ -215,6 +215,24 @@ class CPAC_Column {
 		if ( ! isset( $this->options['label'] ) ) {
 			$this->options['label'] = $this->properties['label'];
 		}
+
+		/**
+		 * Filter the options of a column type, such as whether the column is editable and what the before and after texts are
+		 *
+		 * @since NEWVERSION
+		 *
+		 * @param array $options Column options
+		 * @param array $properties Column properties
+		 */
+		$this->options = apply_filters( 'cac/column/options', $this->options, $this->properties ); // do not pass $this because object is not ready
+
+		/**
+		 * Filter the options of a column type for a specific storage model
+		 *
+		 * @since NEWVERSION
+		 * @see filter cac/column/options
+		 */
+		$this->options = apply_filters( "cac/column/options/storage_key={$this->storage_model->key}", $this->options, $this->properties ); // do not pass $this because object is not ready
 
 		// Convert properties and options arrays to object
 		$this->options = (object) $this->options;
@@ -678,11 +696,15 @@ class CPAC_Column {
 	 *
 	 */
 	public function get_color_for_display( $color_hex ) {
+
 		if ( ! $color_hex ) {
 			return false;
 		}
+
+		$background_color = ( substr( $color_hex, 0, 1 ) == '#' ? '' : '#' ) . $color_hex;
 		$text_color = $this->get_text_color( $color_hex );
-		return "<div class='cpac-color'><span style='background-color:{$color_hex};color:{$text_color}'>{$color_hex}</span></div>";
+
+		return "<div class='cpac-color'><span style='background-color:{$background_color};color:{$text_color}'>{$color_hex}</span></div>";
 	}
 
 	/**
@@ -703,7 +725,7 @@ class CPAC_Column {
 	 * @since 1.0
 	 */
 	public function hex2rgb( $hex ) {
-		$hex = str_replace( "#", "", $hex );
+		$hex = str_replace( '#', '', $hex );
 
 		if(strlen($hex) == 3) {
 			$r = hexdec(substr($hex,0,1).substr($hex,0,1));
@@ -1134,6 +1156,32 @@ class CPAC_Column {
 				<select name="<?php $this->attr_name( $name ); ?>" id="<?php $this->attr_id( $name ); ?>">
 				<?php foreach ( $options as $key => $label ) : ?>
 					<option value="<?php echo $key; ?>"<?php selected( $key, $current ); ?>><?php echo $label; ?></option>
+				<?php endforeach; ?>
+				</select>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * @since NEWVERSION
+	 *
+	 * @param string $name Name of the column option
+	 * @return string $label Label
+	 * @return array $options Select options
+	 * @return strong $description (optional) Description below the label
+	 */
+	public function display_field_radio( $name, $label, $options = array(), $description = '' ) {
+		$current = $this->get_option( $name );
+		?>
+		<tr class="column-<?php echo $name; ?>">
+			<?php $this->label_view( $label, $description, $name ); ?>
+			<td class="input">
+				<?php foreach ( $options as $key => $label ) : ?>
+					<label>
+						<input type="radio" name="<?php $this->attr_name( $name ); ?>" id="<?php $this->attr_id( $name . '-' . $key ); ?>" value="<?php echo $key; ?>"<?php checked( $key, $current ); ?>>
+						<?php echo $label; ?>
+					</label>
 				<?php endforeach; ?>
 				</select>
 			</td>
