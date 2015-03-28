@@ -368,6 +368,44 @@ h2.cpac-nav-tab-wrapper {
 					background: #ffffff;
 					border-top: 1px solid #F5F5F5;
 
+					&.divided {
+						padding: 0;
+
+						table {
+							width: 100%;
+							border-collapse: collapse;
+
+							tr {
+								td {
+									margin: 0;
+									padding: 6px;
+									width: 50%;
+									line-height: 28px;
+									vertical-align: middle;
+									background: #FFF;
+									border: none;
+									border-top: 1px solid #F2F2F2;
+
+									&.label {
+										background: none;
+
+										label {
+											font-weight: normal;
+										}
+									}
+
+									&:first-child {
+										border-right: 1px solid #E8E8E8;
+									}
+								}
+
+								&:first-child td {
+									border-top: none;
+								}
+							}
+						}
+					}
+
 					select,
 					input[type=text] {
 						width: 99.95%; // excl padding

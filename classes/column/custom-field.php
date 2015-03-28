@@ -45,6 +45,8 @@ class CPAC_Column_Custom_Field extends CPAC_Column {
 
 		$this->options['post_property_display'] = 'title';
 		$this->options['post_link_to']			= 'edit_post';
+
+		$this->options['text_output']			= 'raw';
 	}
 
 	/**
@@ -218,7 +220,7 @@ case 'date':
 		 * Filter the available custom field type groups for the meta (custom field) field
 		 * All custom field types from this column are assigned a group
 		 *
-		 * @since 3.5
+		 * @since NEWVERSION
 		 *
 		 * @param array $groups Custom field type groups ([key] => [label])
 		 */
@@ -246,7 +248,7 @@ case 'date':
 	 * - Single IDs as an integer or as a string
 	 * - 
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 *
 	 * @param mixed $input Input, either an array, object, string or integer.
 	 * @param bool $single Whether a single ID (true) should be returned or an array of results (false)
@@ -286,7 +288,9 @@ case 'date':
 		}
 
 		// Sanitize IDs
-		$ids = (array) $ids;
+		if ( ! is_array( $ids ) ) {
+			$ids = empty( $ids ) ? array() : array( $ids );
+		}
 
 		foreach ( $ids as $index => $id ) {
 			$ids[ $index ] = preg_replace( '/[^0-9]/', '', $id );
@@ -300,7 +304,7 @@ case 'date':
 	}
 
 	/**
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function get_meta_value( $id, $single = false ) {
 
@@ -370,8 +374,13 @@ case 'date':
 
 		switch ( $this->get_field_type() ) {
 			// Basic
+			case 'text':
+				$value = $this->format_text_output( $raw_value, $this->get_option( 'text_output' ) );
+				break;
+
 			case 'textarea':
-				$value = $this->get_shortened_string( $raw_value, $this->get_option( 'excerpt_length' ) );
+				$value = $this->format_text_output( $raw_value, $this->get_option( 'text_output' ) );
+				$value = $this->get_shortened_string( $value, $this->get_option( 'excerpt_length' ) );
 				break;
 
 			case 'number':
@@ -380,6 +389,9 @@ case 'date':
 
 				if ( $formatted_value == $raw_value ) {
 					$value = number_format_i18n( floatval( str_replace( ',', '.', $formatted_value ) ), $this->get_option( 'decimal_places' ) );
+				}
+				else {
+					$value = '<em>' . __( 'NaN' ) . '</em>';
 				}
 				break;
 
@@ -494,6 +506,29 @@ case 'date':
 	}
 
 	/**
+	 * Format text output
+	 *
+	 * @since NEWVERSION
+	 *
+	 * @param string $value Value to format
+	 * @param string $format Format type; raw|formatted_html|strip_tags
+	 * @return string Formatted value
+	 */
+	public function format_text_output( $value, $format = 'raw' ) {
+
+		switch ( $format ) {
+			case 'raw':
+				$value = esc_html( $value );
+				break;
+			case 'strip_tags':
+				$value = preg_replace( '/<.*?>/', '', $value );
+				break;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * @see CPAC_Column::display_settings()
 	 * @since 1.0
 	 */
@@ -505,10 +540,12 @@ case 'date':
 		switch ( $this->options->field_type ) {
 			// Basic
 			case 'text':
+				$this->display_field_text_output();
 				break;
 
 			case 'textarea':
 			 	$this->display_field_excerpt_length();
+			 	$this->display_field_text_output();
 				break;
 				
 			case 'number':
@@ -566,7 +603,7 @@ case 'date':
 	/**
 	 * Display settings field for post property to display
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_post_property_display() {
 
@@ -584,7 +621,7 @@ case 'date':
 	/**
 	 * Display settings field for the page the posts should link to
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_post_link_to() {
 
@@ -603,9 +640,28 @@ case 'date':
 	}
 
 	/**
+	 * Display settings field for the type of output
+	 *
+	 * @since NEWVERSION
+	 */
+	public function display_field_text_output() {
+
+		$this->display_field_radio(
+			'text_output',
+			__( 'Output', 'cpac' ),
+			array(
+				'raw' => __( 'Raw', 'cpac' ),
+				'formatted_html' => __( 'Parse HTML' ),
+				'strip_tags' => __( 'Strip HTML tags', 'cpac' )
+			),
+			__( 'The formatting to apply to the column value.', 'cpac' )
+		);
+	}
+
+	/**
 	 * Display settings field for selecting a taxonomy
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_taxonomy() {
 
@@ -622,7 +678,7 @@ case 'date':
 	/**
 	 * Display the settings field for the number of decimal places to display
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_decimal_places() {
 
@@ -632,7 +688,7 @@ case 'date':
 	/**
 	 * Display the settings field the maximum number of entries for this field to display
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_entry_limit() {
 
@@ -653,7 +709,7 @@ case 'date':
 	/**
 	 * Display the settings field for the column field key
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_field_key() {
 
@@ -681,7 +737,7 @@ case 'date':
 	/**
 	 * Display the settings field for the column field type
 	 *
-	 * @since 3.5
+	 * @since NEWVERSION
 	 */
 	public function display_field_field_type() {
 
