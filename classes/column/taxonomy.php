@@ -16,12 +16,13 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 		parent::init();
 
 		// Properties
-		$this->properties['type']			= 'column-taxonomy';
-		$this->properties['label']			= __( 'Taxonomy', 'cpac' );
-		$this->properties['is_cloneable']	= true;
+		$this->properties['type']				= 'column-taxonomy';
+		$this->properties['label']				= __( 'Taxonomy', 'cpac' );
+		$this->properties['is_cloneable']		= true;
 
 		// Options
-		$this->options['taxonomy']	= ''; // Taxonomy slug
+		$this->options['taxonomy']				= ''; // Taxonomy slug
+		$this->options['show_term_hierarchy']	= 'no';
 	}
 
 	/**
@@ -29,9 +30,22 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 * @since 2.0
 	 */
 	public function get_value( $post_id ) {
+
 		$term_ids = $this->get_raw_value( $post_id );
 
-		return $this->get_terms_for_display( $term_ids, $this->options->taxonomy );
+		if ( $this->get_option( 'show_term_hierarchy' ) != 'on' ) {
+			return $this->get_terms_for_display( $term_ids, $this->get_taxonomy() );
+		}
+
+		foreach ( $term_ids as $term_id ) {
+			$term_ancestry = get_ancestors( $term_id, $this->get_taxonomy() );
+			$term_ancestry = array_reverse( $term_ancestry );
+			$term_ancestry[] = $term_id;
+
+			$ancestries[] = $this->get_terms_for_display( $term_ancestry, $this->get_taxonomy(), ' / ' );
+		}
+
+		return implode( "<br/>\n", $ancestries );
 	}
 
 	/**
@@ -40,7 +54,7 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 */
 	public function get_raw_value( $post_id ) {
 
-		return wp_get_post_terms( $post_id, $this->options->taxonomy, array( 'fields' => 'ids' ) );
+		return wp_get_post_terms( $post_id, $this->get_taxonomy(), array( 'fields' => 'ids' ) );
 	}
 
 	/**
@@ -48,7 +62,8 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 * @since 2.3.4
 	 */
 	public function get_taxonomy() {
-		return $this->options->taxonomy;
+
+		return $this->get_option( 'taxonomy' );
 	}
 
 	/**
@@ -74,6 +89,17 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 */
 	public function display_settings() {
 
+		$this->display_field_taxonomy();
+		$this->display_field_show_term_hierarchy();
+	}
+
+	/**
+	 * Display taxonomy settings field
+	 *
+	 * @since NEWVERSION
+	 */
+	public function display_field_taxonomy() {
+
 		$taxonomies = get_object_taxonomies( $this->get_post_type(), 'objects' );
 
 		foreach ( $taxonomies as $index => $taxonomy ) {
@@ -96,4 +122,23 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 
 		<?php
 	}
+
+	/**
+	 * Display settings field for enabling showing the full term hierarchy
+	 *
+	 * @since NEWVERSION
+	 */
+	public function display_field_show_term_hierarchy() {
+
+		$this->display_field_radio(
+			'show_term_hierarchy',
+			__( 'Show term hierarchy', 'cpac' ),
+			array(
+				'on' => __( 'Yes' ),
+				'off' => __( 'No' )
+			),
+			__( 'Whether the full term hierarchy, including parent terms, should be shown.', 'cpac' )
+		);
+	}
+
 }

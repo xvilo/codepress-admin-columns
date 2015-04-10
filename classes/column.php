@@ -597,7 +597,7 @@ class CPAC_Column {
 	/**
 	 * @since 2.2.6
 	 */
-	public function get_terms_for_display( $term_ids, $taxonomy ) {
+	public function get_terms_for_display( $term_ids, $taxonomy, $separator = ', ' ) {
 		if ( empty( $term_ids ) ) {
 			return false;
 		}
@@ -627,7 +627,7 @@ class CPAC_Column {
 			return false;
 		}
 
-		return implode( ', ', $values );
+		return implode( $separator, $values );
 	}
 
 	/**
@@ -1362,4 +1362,31 @@ class CPAC_Column {
 		</div>
 		<?php
 	}
+
+	/**
+	 * @since NEWVERSION
+	 *
+	 * @param string $name Name of the column option
+	 * @return string $label Label
+	 * @return array $options Select options
+	 * @return strong $description (optional) Description below the label
+	 */
+	public function display_field_radio( $name, $label, $options = array(), $description = '' ) {
+		$current = $this->get_option( $name );
+		?>
+		<tr class="column-<?php echo $name; ?>">
+			<?php $this->label_view( $label, $description, $name ); ?>
+			<td class="input">
+				<?php foreach ( $options as $key => $label ) : ?>
+					<label>
+						<input type="radio" name="<?php $this->attr_name( $name ); ?>" id="<?php $this->attr_id( $name . '-' . $key ); ?>" value="<?php echo $key; ?>"<?php checked( $key, $current ); ?>>
+						<?php echo $label; ?>
+					</label>
+				<?php endforeach; ?>
+				</select>
+			</td>
+		</tr>
+		<?php
+	}
+
 }
