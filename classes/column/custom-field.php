@@ -251,10 +251,13 @@ case 'date':
 	 * @since NEWVERSION
 	 *
 	 * @param mixed $input Input, either an array, object, string or integer.
+	 * @param string $filter Optional. Filter for sanitization. Defaults to "numeric", returning only numeric IDs.
+	 *                       Allows empty, "numeric" or any regular expression. Using a regular expression reults in
+	 *                       anything matching the expression being removed from the ID.
 	 * @param bool $single Whether a single ID (true) should be returned or an array of results (false)
 	 * @return int|array Either an array of IDs or a single ID, depending on $single
 	 */
-	public function parse_ids( $input, $single = false ) {
+	public function parse_ids( $input, $filter = 'numeric', $single = false ) {
 
 		$ids = $input;
 		$input = maybe_unserialize( $input );
@@ -270,7 +273,7 @@ case 'date':
 			$ids = array();
 
 			foreach ( $input as $index => $value ) {
-				$id = $this->parse_ids( $value, true );
+				$id = $this->parse_ids( $value, $filter, true );
 
 				if ( ! empty( $id ) ) {
 					$ids[] = $id;
@@ -292,8 +295,15 @@ case 'date':
 			$ids = empty( $ids ) ? array() : array( $ids );
 		}
 
-		foreach ( $ids as $index => $id ) {
-			$ids[ $index ] = preg_replace( '/[^0-9]/', '', $id );
+		// Apply custom filter
+		if ( $filter ) {
+			if ( $filter = 'numeric' ) {
+				$filter = '/[^0-9]/';
+			}
+
+			foreach ( $ids as $index => $id ) {
+				$ids[ $index ] = preg_replace( $filter, '', $id );
+			}
 		}
 
 		if ( $single ) {
