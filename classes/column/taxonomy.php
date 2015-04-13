@@ -22,7 +22,7 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 
 		// Options
 		$this->options['taxonomy']				= ''; // Taxonomy slug
-		$this->options['show_term_hierarchy']	= 'no';
+		$this->options['term_selection']		= 'no';
 	}
 
 	/**
@@ -33,19 +33,32 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 
 		$term_ids = $this->get_raw_value( $post_id );
 
-		if ( $this->get_option( 'show_term_hierarchy' ) != 'on' ) {
-			return $this->get_terms_for_display( $term_ids, $this->get_taxonomy() );
+		if ( $this->get_option( 'term_selection' ) == 'term_hierarchy' ) {
+			$ancestries = array();
+
+			foreach ( $term_ids as $term_id ) {
+				$term_ancestry = get_ancestors( $term_id, $this->get_taxonomy() );
+				$term_ancestry = array_reverse( $term_ancestry );
+				$term_ancestry[] = $term_id;
+
+				$ancestries[] = $this->get_terms_for_display( $term_ancestry, $this->get_taxonomy(), ' / ' );
+			}
+
+			return implode( "<br/>\n", $ancestries );
 		}
 
-		foreach ( $term_ids as $term_id ) {
-			$term_ancestry = get_ancestors( $term_id, $this->get_taxonomy() );
-			$term_ancestry = array_reverse( $term_ancestry );
-			$term_ancestry[] = $term_id;
+		if ( $this->get_option( 'term_selection' ) == 'top_level_term' ) {
+			$top_level_terms = array();
 
-			$ancestries[] = $this->get_terms_for_display( $term_ancestry, $this->get_taxonomy(), ' / ' );
+			foreach ( $term_ids as $term_id ) {
+				$term_ancestry = get_ancestors( $term_id, $this->get_taxonomy() );
+				$top_level_terms[] = $term_ancestry[ count( $term_ancestry ) - 1 ];
+			}
+
+			return $this->get_terms_for_display( $top_level_terms, $this->get_taxonomy() );
 		}
 
-		return implode( "<br/>\n", $ancestries );
+		return $this->get_terms_for_display( $term_ids, $this->get_taxonomy() );
 	}
 
 	/**
@@ -90,7 +103,7 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	public function display_settings() {
 
 		$this->display_field_taxonomy();
-		$this->display_field_show_term_hierarchy();
+		$this->display_field_term_selection();
 	}
 
 	/**
@@ -128,16 +141,17 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 *
 	 * @since NEWVERSION
 	 */
-	public function display_field_show_term_hierarchy() {
+	public function display_field_term_selection() {
 
 		$this->display_field_radio(
-			'show_term_hierarchy',
-			__( 'Show term hierarchy', 'cpac' ),
+			'term_selection',
+			__( 'Term display selection', 'cpac' ),
 			array(
-				'on' => __( 'Yes' ),
-				'off' => __( 'No' )
+				'child_term' => __( 'Only assigned terms', 'cpac' ),
+				'term_hierarchy' => __( 'Full term hierarchy', 'cpac' ),
+				'top_level_term' => __( 'Show topmost parent of term', 'cpac' )
 			),
-			__( 'Whether the full term hierarchy, including parent terms, should be shown.', 'cpac' )
+			__( 'Whether the full term hierarchy, including parent terms, should be shown, or just the child or top level term.', 'cpac' )
 		);
 	}
 
