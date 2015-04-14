@@ -143,7 +143,7 @@ class CPAC_Column_Taxonomy extends CPAC_Column {
 	 */
 	public function display_field_term_selection() {
 
-		$this->display_field_radio(
+		$this->display_field_select(
 			'term_selection',
 			__( 'Term display selection', 'cpac' ),
 			array(
