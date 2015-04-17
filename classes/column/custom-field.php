@@ -472,6 +472,11 @@ case 'date':
 				$value = implode( ', ', $items );
 				break;
 
+			case 'term':
+				$value = $this->get_terms_for_display( $raw_value, $this->get_option( 'taxonomy' ) );
+				break;
+
+
 			// Miscellaneous
 			case 'checkbox':
 				$value = $this->get_asset_image( $raw_value ? 'checkmark.png' : 'no.png' );
@@ -581,8 +586,23 @@ case 'date':
 				
 			// Relational
 			case 'post':
-				$this->display_field_post_property_display();
-				$this->display_field_post_link_to();
+				?>
+				<tr class="column-multiple-values">
+					<?php $this->label_view(
+						__( 'Display', 'cpac' ),
+						__( 'Display options', 'cpac' ),
+						'allow_multiple_values-yes'
+					); ?>
+					<td class="input divided">
+						<table class="subtable">
+						<?php
+						$this->display_field_post_property_display();
+						$this->display_field_post_link_to();
+						?>
+						</table>
+					</td>
+				</tr>
+				<?php
 				break;
 				
 			case 'term':

@@ -615,18 +615,27 @@ class CPAC_Column {
 
 		$values = array();
 		$term_ids = (array) $term_ids;
+
 		if ( $term_ids && ! is_wp_error( $term_ids ) ) {
 			$post_type = $this->get_post_type();
+
 			foreach ( $term_ids as $term_id ) {
 				$term = get_term( $term_id, $taxonomy );
+
+				if ( ! $term ) {
+					continue;
+				}
+
 				$title = esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, $term->taxonomy, 'edit' ) );
 
 				$filter_key = $term->taxonomy;
+
 				if ( 'category' === $term->taxonomy ) {
 					$filter_key = 'category_name';
 				}
 
 				$link = "<a href='edit.php?post_type={$post_type}&{$filter_key}={$term->slug}'>{$title}</a>";
+
 				if ( $post_type == 'attachment' ) {
 					$link = "<a href='upload.php?taxonomy={$filter_key}&term={$term->slug}'>{$title}</a>";
 				}
@@ -634,6 +643,7 @@ class CPAC_Column {
 				$values[] = $link;
 			}
 		}
+		
 		if ( ! $values ) {
 			return false;
 		}
