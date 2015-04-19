@@ -350,10 +350,11 @@ case 'date':
 
 			// Miscellaneous
 			case 'checkbox':
-				$raw_value = true;
-
-				if ( empty( $raw_value ) || $meta === '0' || $meta === 'false' || $meta === 'no' ) {
+				if ( empty( $raw_value ) || $raw_value === '0' || $raw_value === 'false' || $raw_value === 'no' ) {
 					$raw_value = false;
+				}
+				else {
+					$raw_value = true;
 				}
 				break;
 
