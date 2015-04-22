@@ -367,7 +367,7 @@ case 'date':
 				break;
 
 			case 'date':
-				$raw_value = $this->get_timestamp( $raw_value );
+				$raw_value = $this->get_timestamp( $raw_value, $this->get_date_save_format() );
 				break;
 		}
 
@@ -625,11 +625,59 @@ case 'date':
 				
 			case 'date':
 				$this->display_field_date_format();
+				$this->display_field_date_save_format();
 				break;
 		}
 
 		$this->display_field_before_after();
 	}
+
+	/**
+	 * Get the date format in which dates should be stored
+	 *
+	 * @since NEWVERSION
+	 *
+	 * @return string Date format
+	 */
+	public function get_date_save_format() {
+
+		$format = $this->get_option( 'date_save_format' );
+
+		if ( ! $format ) {
+			$format = 'U';
+		}
+
+		return $format;
+	}
+
+	/**
+	 * Add date save format to column edit box
+	 *
+	 * @since NEWVERSION
+	 */
+	public function display_field_date_save_format() {
+
+		// Date save format: settings
+		$field_key		= 'date_save_format';
+		$label			= __( 'Date save format', 'cpac' );
+		$description	= __( 'Fill in the date format as it is stored. This is used to accurately determine the date.', 'cpac' );
+
+		// store format
+		$default_format   = 'U';
+		$date_save_format = isset( $this->options->date_save_format ) ? $this->options->date_save_format : $default_format;
+		?>
+		<tr class="column_<?php echo $field_key; ?>">
+			<?php $this->label_view( $label, $description, $field_key ); ?>
+			<td class="input">
+				<input type="text" name="<?php $this->attr_name( $field_key ); ?>" id="<?php $this->attr_id( $field_key ); ?>" value="<?php echo $date_save_format; ?>" placeholder="<?php _e( 'Fill in a date save format', 'cpac' ); ?>"/>
+				<p class="description">
+					<?php printf( __( 'Defaults to: %s.', 'cpac' ), $default_format . ' (' . __( 'UNIX timestamp', 'cpac' ) . ')' ); ?>
+					<a target='_blank' href='http://php.net/manual/en/function.date.php'><?php _e( 'See all available formats', 'cpac' ); ?>.</a>
+				</p>
+			</td>
+		</tr>
+		<?php
+	}		
 
 	/**
 	 * Display settings field for post property to display

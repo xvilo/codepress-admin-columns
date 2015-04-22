@@ -919,12 +919,20 @@ class CPAC_Column {
 	 * @param string $date
 	 * @return string Formatted date
 	 */
-	public function get_timestamp( $date ) {
+	public function get_timestamp( $date, $format = '' ) {
 
 		if ( empty( $date ) || in_array( $date, array( '0000-00-00 00:00:00', '0000-00-00', '00:00:00' ) ) ) {
 			return false;
 		}
 
+		if ( $format && function_exists( 'date_create_from_format' ) ) {
+			$date_found = date_create_from_format( $format, $date, new DateTimeZone( 'Etc/UTC' ) );
+
+			if ( $date_found ) {
+				return $date_found->getTimestamp();
+			}
+		}
+		
 		// some plugins store dates in a jquery timestamp format, format is in ms since The Epoch.
 		// See http://api.jqueryui.com/datepicker/#utility-formatDate
 		// credits: nmarks
@@ -945,7 +953,6 @@ class CPAC_Column {
 				$date = strtotime( $date );
 			}
 		}
-
 		// Parse with strtotime if it's not numeric
 		else {
 			$date = strtotime( $date );
