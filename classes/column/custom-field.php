@@ -490,7 +490,7 @@ case 'date':
 				break;
 
 			case 'date':
-				$this->get_date( $raw_value, $this->get_option( 'date_format' ) );
+				$value = $this->get_date( $raw_value + get_option( 'gmt_offset' ) * HOUR_IN_SECONDS, $this->get_option( 'date_format' ) );
 				break;
 
 			// Default
