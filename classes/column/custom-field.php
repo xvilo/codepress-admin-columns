@@ -202,7 +202,7 @@ case 'date':
 		 *
 		 * @param array $custom_field_types Available custom field types ([type] => [label])
 		 */
-		$custom_field_types = apply_filters( 'cac/column/meta/types', $custom_field_types );
+		//$custom_field_types = apply_filters( 'cac/column/meta/types', $custom_field_types );
 
 		return $custom_field_types;
 	}
@@ -241,12 +241,12 @@ case 'date':
 		return substr( $this->options->field, 0, 10 ) == 'cpachidden' ? str_replace( 'cpachidden', '', $this->options->field ) : $this->options->field;
 	}
 
-	/** 
+	/**
 	 * Parse a collection of IDs and format them to a single ID or an array of IDs.
 	 * This method supports:
 	 * - Objects with an "ID"-property
 	 * - Single IDs as an integer or as a string
-	 * - 
+	 * -
 	 *
 	 * @since NEWVERSION
 	 *
@@ -333,7 +333,7 @@ case 'date':
 
 		$field_key = $this->get_field_key();
 		$raw_value = $this->get_meta_value( $id, true );
-		
+
 		switch ( $this->get_field_type() ) {
 			// Content
 			case 'image':
@@ -560,31 +560,31 @@ case 'date':
 				break;
 
 			case 'textarea':
-			 	$this->display_field_excerpt_length();
-			 	$this->display_field_text_output();
+				$this->display_field_excerpt_length();
+				$this->display_field_text_output();
 				break;
-				
+
 			case 'number':
 				$this->display_field_decimal_places();
 				break;
-				
+
 			case 'email':
 				break;
-				
+
 			case 'password':
 				break;
-				
+
 			case 'url':
 				break;
-				
+
 			// Content
 			case 'image':
-			 	$this->display_field_preview_size();
+				$this->display_field_preview_size();
 				break;
-				
+
 			case 'file':
 				break;
-				
+
 			// Relational
 			case 'post':
 				?>
@@ -605,24 +605,24 @@ case 'date':
 				</tr>
 				<?php
 				break;
-				
+
 			case 'term':
 				$this->display_field_taxonomy();
 				break;
-				
+
 			case 'user':
 				break;
-				
+
 			// Miscellaneous
 			case 'checkbox':
 				break;
-				
+
 			case 'color':
 				break;
-				
+
 			case 'count':
 				break;
-				
+
 			case 'date':
 				$this->display_field_date_format();
 				$this->display_field_date_save_format();
@@ -677,7 +677,7 @@ case 'date':
 			</td>
 		</tr>
 		<?php
-	}		
+	}
 
 	/**
 	 * Display settings field for post property to display

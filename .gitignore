@@ -9,3 +9,4 @@ Thumbs.d*
 # Project specific
 .tx
 *.scssc
+src
