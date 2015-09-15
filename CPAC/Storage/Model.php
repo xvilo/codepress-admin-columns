@@ -320,38 +320,26 @@ abstract class CPAC_Storage_Model {
 	 */
 	public function set_columns_filepath() {
 
-		$columns  = array(
-			'CPAC_Column_Custom_Field' 		=> CPAC_DIR . 'classes/column/custom-field.php',
-			'CPAC_Column_Taxonomy' 			=> CPAC_DIR . 'classes/column/taxonomy.php',
-			'CPAC_Column_Used_By_Menu' 		=> CPAC_DIR . 'classes/column/used-by-menu.php'
-		);
+		$columns  = array();
 
-		// Display ACF placeholder
-		if ( class_exists('acf') && ! class_exists( 'CAC_Addon_Pro' ) ) {
-			$columns[ 'CPAC_Column_ACF_Placeholder' ] = CPAC_DIR . 'classes/column/acf-placeholder.php';
-		}
+		$directory = CPAC_DIR . 'CPAC/Column/' . ucfirst( $this->type );
+		$objects = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $directory, RecursiveDirectoryIterator::SKIP_DOTS ) );
 
-		// Directory to iterate
-		$columns_dir = CPAC_DIR . 'classes/column/' . $this->type;
-		if ( is_dir( $columns_dir ) ) {
-			$iterator = new DirectoryIterator( $columns_dir );
-			foreach( $iterator as $leaf ) {
-
-				if ( $leaf->isDot() || $leaf->isDir() ) {
-					continue;
-				}
-
-				// only allow php files, exclude .SVN .DS_STORE and such
-				if ( substr( $leaf->getFilename(), -4 ) !== '.php' ) {
-					continue;
-				}
-
-				// build classname from filename
-				$class_name = 'CPAC_Column_' . ucfirst( $this->type ) . '_'  . implode( '_', array_map( 'ucfirst', explode( '-', basename( $leaf->getFilename(), '.php' ) ) ) );
-
-				// classname | filepath
-				$columns[ $class_name ] = $leaf->getPathname();
+		foreach( $objects as $object ) {
+			// only allow .php files
+			if ( '.php' !== substr( $object->getFilename(), -4 ) ) {
+				continue;
 			}
+
+			$path = $object->getPathName();
+			$classname = str_replace( '/', '_', substr( strstr( $path, 'CPAC' ), 0, -4 ) );
+
+			// Hide ACF placeholder
+			if ( 'CPAC_Column_ACF_Placeholder' == $classname && ( ! class_exists( 'acf' ) || class_exists( 'CAC_Addon_Pro' ) ) ) {
+				continue;
+			}
+
+			$columns[ $classname ] = $path;
 		}
 
 		/**
@@ -470,14 +458,14 @@ abstract class CPAC_Storage_Model {
 
 		$columns = array();
 
-		foreach ( $this->columns_filepath as $classname => $path ) {
-			include_once $path;
+		foreach ( array_keys( $this->columns_filepath ) as $classname ) {
 
-			if ( ! class_exists( $classname ) ) {
+			$r = new ReflectionClass( $classname );
+			$column = $r->newInstance( $this );
+
+			if ( ! $column ) {
 				continue;
 			}
-
-			$column = new $classname( $this );
 
 			// exlude columns that are not registered based on conditional logic within the child column
 			if ( ! $column->properties->is_registered ) {

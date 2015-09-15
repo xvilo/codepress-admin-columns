@@ -4,7 +4,7 @@
  *
  * @since 2.0
  */
-class CPAC_Column_Attached_To extends CPAC_Column {
+class CPAC_Column_Media_Attached_To extends CPAC_Column {
 
 	/**
 	 * @see CPAC_Column::init()

@@ -43,12 +43,19 @@ if ( ! is_admin() ) {
 }
 
 /**
+ * Autoload
+ *
+ * @since 2.4.7
+ */
+require_once CPAC_DIR . '/CPAC/Autoload.php';
+
+/**
  * Dependencies
  *
  * @since 1.3.0
  */
-require_once CPAC_DIR . 'classes/utility.php';
-require_once CPAC_DIR . 'classes/third_party.php';
+require_once CPAC_DIR . 'utility.php';
+require_once CPAC_DIR . 'third_party.php';
 require_once CPAC_DIR . 'includes/arrays.php';
 require_once CPAC_DIR . 'api.php';
 
@@ -119,19 +126,15 @@ class CPAC {
 		add_filter( 'plugin_action_links',  array( $this, 'add_settings_link' ), 1, 2 );
 
 		// Settings
-		include_once CPAC_DIR . 'classes/settings.php';
 		$this->_settings = new CPAC_Settings( $this );
 
 		// Addons
-		include_once CPAC_DIR . 'classes/addons.php';
 		$this->_addons = new CPAC_Addons( $this );
 
 		// Upgrade
-		require_once CPAC_DIR . 'classes/upgrade.php';
 		$this->_upgrade = new CPAC_Upgrade( $this );
 
 		// Settings
-		include_once CPAC_DIR . 'classes/review_notice.php';
 		new CPAC_Review_Notice( $this );
 	}
 
@@ -232,17 +235,6 @@ class CPAC {
 	public function set_storage_models() {
 
 		$storage_models = array();
-
-		// Load storage model class files and column base class files
-		require_once CPAC_DIR . 'classes/column.php';
-		require_once CPAC_DIR . 'classes/column/default.php';
-		require_once CPAC_DIR . 'classes/column/actions.php';
-		require_once CPAC_DIR . 'classes/storage_model.php';
-		require_once CPAC_DIR . 'classes/storage_model/post.php';
-		require_once CPAC_DIR . 'classes/storage_model/user.php';
-		require_once CPAC_DIR . 'classes/storage_model/media.php';
-		require_once CPAC_DIR . 'classes/storage_model/comment.php';
-		require_once CPAC_DIR . 'classes/storage_model/link.php';
 
 		// Create a storage model per post type
 		foreach ( $this->get_post_types() as $post_type ) {
